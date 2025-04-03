@@ -1,0 +1,27 @@
+name: Deploy Static HTML files to Nginx
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: SSH into EC2 and update static folders
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            echo "Connected"
+            cd /home/ec2-user/crushed-lemon-statics
+            git pull origin main
+            echo "Copying files"
+            sudo cp -rf /home/ec2-user/crushed-lemon-statics/usr/share/nginx/html/* /usr/share/nginx/html
